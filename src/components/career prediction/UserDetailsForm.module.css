@@ -183,6 +183,13 @@
 .radioQuestions {
   display: contents;
 }
+.responseError {
+  font-size: "14px";
+  font-weight: 500;
+  color: #c30000;
+  margin-top: 1.2rem;
+  margin-bottom: -1.5rem;
+}
 
 @keyframes opening {
   0% {

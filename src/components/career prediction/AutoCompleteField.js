@@ -46,7 +46,6 @@ export default function AutocompleteField(props) {
   return (
     <ThemeProvider theme={theme}>
       <Autocomplete
-        // multiple
         id="Area of interest"
         options={areaOfInterests}
         getOptionLabel={(option) => option.area}
@@ -58,7 +57,11 @@ export default function AutocompleteField(props) {
           <TextField
             {...params}
             error={props.error && !props.chosenInterest}
-            helperText={props.error && !props.chosenInterest ? "Enter your area of Interest" : ""}
+            helperText={
+              props.error && !props.chosenInterest
+                ? "Enter your area of Interest"
+                : ""
+            }
             variant="standard"
             label="Choose your area of interests"
             placeholder="Add your area of interests"

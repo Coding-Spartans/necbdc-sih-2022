@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, TextField } from "@mui/material";
+import { Button, CircularProgress, TextField } from "@mui/material";
 import classes from "./SignUpForm.module.css";
 import FacebookIcon from "./FacebookIcon";
 import AppleIcon from "./AppleIcon";
@@ -17,6 +17,8 @@ const SignUpForm = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [responseError, setResponseError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const isEmpty = (text) => text.trim().length === 0;
@@ -37,6 +39,7 @@ const SignUpForm = () => {
   const submitHandler = (event) => {
     event.preventDefault();
     setUserNameError(false);
+    setLoading(true);
     setEmailError(false);
     setPasswordError(false);
     setConfirmPasswordError(false);
@@ -55,6 +58,8 @@ const SignUpForm = () => {
       isEmpty(enteredEmail) ||
       isPasswordCorrect()
     ) {
+      setResponseError(false);
+      setLoading(false);
       return;
     }
     axios
@@ -62,13 +67,15 @@ const SignUpForm = () => {
         name: enteredUserName.trim(),
         email: enteredEmail.trim(),
         password: enteredPassword,
-        confirmpassword: enteredConfirmPassword,
+        cpassword: enteredConfirmPassword,
       })
-      .then((res) => {})
+      .then((res) => {
+        navigate("/login");
+      })
       .catch((error) => {
-        console.log(error.message);
+        setLoading(false);
+        setResponseError("Something went wrong :(");
       });
-    navigate("/");
   };
   return (
     <div className={classes.formContainer}>
@@ -145,7 +152,14 @@ const SignUpForm = () => {
             className={classes.formButton + " " + classes.signUp}
             variant="contained"
           >
-            Sign up
+            {loading ? (
+              <CircularProgress
+                sx={{ width: "25px!important", height: "25px!important" }}
+                color="inherit"
+              />
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
         <div className={classes.divider}>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, TextField } from "@mui/material";
+import { Button, CircularProgress, TextField } from "@mui/material";
 import classes from "./SignInForm.module.css";
 import FacebookIcon from "./FacebookIcon";
 import AppleIcon from "./AppleIcon";
@@ -17,6 +17,7 @@ const SignInForm = () => {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [responseError, setResponseError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isEmpty = (text) => text.trim().length === 0;
   const isPasswordCorrect = (password) => {
@@ -32,6 +33,7 @@ const SignInForm = () => {
     event.preventDefault();
     setEmailError(false);
     setPasswordError(false);
+    setLoading(true);
     setResponseError(false);
     if (isEmpty(enteredEmail)) {
       setEnteredEmail("");
@@ -39,6 +41,8 @@ const SignInForm = () => {
     }
     isPasswordCorrect(enteredPassword);
     if (isEmpty(enteredEmail) || isPasswordCorrect(enteredPassword)) {
+      setLoading(false);
+      setResponseError(false);
       return;
     }
     dispatch(
@@ -51,22 +55,30 @@ const SignInForm = () => {
         email: enteredEmail.trim(),
         password: enteredPassword,
       })
-      .then((res) => {})
+      .then((res) => {
+        const userData = res.data;
+        const expiryDate = new Date(
+          new Date().getTime() + 5 * 24 * 60 * 60 * 1000
+        );
+        localStorage.setItem("token", userData.token);
+        localStorage.setItem("name", userData.name);
+        localStorage.setItem("userId", userData.userId);
+        localStorage.setItem("expiryDate", expiryDate.toISOString());
+        dispatch(
+          userActions.login({
+            userAuthInfo: {
+              token: userData.token,
+              userId: userData.userId,
+              name: userData.name,
+            },
+          })
+        );
+        navigate("/");
+      })
       .catch((error) => {
-        console.log(error);
+        setLoading(false);
+        setResponseError("Something went wrong :(");
       });
-    navigate("/");
-
-    // fetch(
-    //   "URL", // Enter the server url
-    //   {
-    //     method: "POST",
-    //     body: JSON.stringify({
-    //       email: enteredEmail.trim(),
-    //       password: enteredPassword
-    //     }),
-    //   }
-    // );
   };
   return (
     <div className={classes.formContainer}>
@@ -117,7 +129,14 @@ const SignInForm = () => {
             className={classes.formButton + " " + classes.signIn}
             variant="contained"
           >
-            Sign in
+            {loading ? (
+              <CircularProgress
+                sx={{ width: "25px!important", height: "25px!important" }}
+                color="inherit"
+              />
+            ) : (
+              "Sign In"
+            )}
           </Button>
         </form>
         <div className={classes.divider}>

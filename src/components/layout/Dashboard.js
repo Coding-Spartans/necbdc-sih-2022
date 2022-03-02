@@ -44,6 +44,11 @@ export default function Dashboard(props) {
         setAnimation(classes.home);
       } else if (location.pathname === "/login") {
         setAnimation(classes.signIn);
+      } else if (
+        location.pathname === "/predict-career/pathway" &&
+        history[history.length - 2] === "/predict-career"
+      ) {
+        setAnimation(classes.predictCareer_rev);
       }
     }
   }, [location.pathname]);

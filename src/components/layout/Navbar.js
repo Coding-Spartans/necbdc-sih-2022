@@ -5,8 +5,6 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -22,6 +20,9 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import CareerIcon from "@mui/icons-material/Insights";
+import { useDispatch, useSelector } from "react-redux";
+import { ExitToApp, GroupAdd } from "@mui/icons-material";
+import { userActions } from "../../store/user-slice";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -63,8 +64,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const ListButton = (props) => (
+  <ListItem disabled={props.disabled} onClick={props.onClick} button>
+    <ListItemIcon sx={{ minWidth: "46px" }}>{props.icon}</ListItemIcon>
+    <ListItemText primary={props.primary} />
+  </ListItem>
+);
+
 export default function Navbar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   let navigate = useNavigate();
   let location = useLocation();
 
@@ -89,27 +99,6 @@ export default function Navbar(props) {
       }, 400);
   };
   const menuId = "primary-search-account-menu";
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={openLoginPage}>My account</MenuItem>
-    </Menu>
-  );
-
   return (
     <React.Fragment>
       <Box sx={{ flexGrow: 1, width: "100%" }}>
@@ -151,29 +140,50 @@ export default function Navbar(props) {
             </Search>
             <Box sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}>
               <div className={classes.logo}>
-                <Link to="/predict-career">Predict your career</Link>
+                <Link
+                  to={
+                    user.userPath.prediction.length || user.userPath.path.length
+                      ? "/predict-career/pathway"
+                      : "/predict-career"
+                  }
+                >
+                  Predict your career
+                </Link>
               </div>
             </Box>
-            <Box sx={{ display: "flex" }}>
-              {/* <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton> */}
-              <div onClick={openLoginPage} className={classes.logo}>
-                Login
-              </div>
-            </Box>
+            {user.isLoggedIn ? (
+              <React.Fragment>
+                <Box
+                  sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}
+                >
+                  {user.userAuthInfo.name ? (
+                    <div style={{ cursor: "text" }} className={classes.logo}>
+                      {`Hello, ${user.userAuthInfo.name}`}
+                    </div>
+                  ) : null}
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <div
+                    onClick={() => {
+                      dispatch(userActions.logout());
+                      openLoginPage();
+                    }}
+                    className={classes.logo}
+                  >
+                    Logout
+                  </div>
+                </Box>
+              </React.Fragment>
+            ) : (
+              <Box sx={{ display: "flex" }}>
+                <div onClick={openLoginPage} className={classes.logo}>
+                  Login
+                </div>
+              </Box>
+            )}
           </Toolbar>
         </AppBar>
-        {/* {renderMobileMenu}
-      {renderMenu} */}
+        {/* {renderMenu} */}
         <Drawer anchor={"left"} open={isMenuOpen} onClose={handleMenuClose}>
           <Box
             sx={{
@@ -182,40 +192,76 @@ export default function Navbar(props) {
             }}
             role="presentation"
           >
+            {user.isLoggedIn && user.userAuthInfo.name ? (
+              <Box
+                sx={{
+                  padding: "8px 16px",
+                  fontWeight: 500,
+                  fontSize: "0.9rem",
+                }}
+                role="presentation"
+              >
+                {`Hello, ${user.userAuthInfo.name}`}
+              </Box>
+            ) : null}
             <List>
-              <ListItem
+              <ListButton
                 onClick={() => {
                   navigate("/");
                 }}
                 disabled={location.pathname === "/"}
-                button
-              >
-                <ListItemIcon sx={{ minWidth: "46px" }}>
-                  <HomeIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Home"} />
-              </ListItem>
-              <ListItem
+                icon={<HomeIcon />}
+                primary="Home"
+              />
+              <ListButton
                 onClick={() => {
-                  navigate("/predict-career");
+                  navigate(
+                    user.userPath.prediction.length || user.userPath.path.length
+                      ? "/predict-career/pathway"
+                      : "/predict-career"
+                  );
                 }}
                 disabled={location.pathname === "/predict-career"}
+                icon={<CareerIcon />}
+                primary="Predict your career"
                 button
-              >
-                <ListItemIcon sx={{ minWidth: "46px" }}>
-                  <CareerIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Predict your career"} />
-              </ListItem>
+              />
             </List>
             <Divider />
             <List>
-              <ListItem button>
-                <ListItemIcon sx={{ minWidth: "46px" }}>
-                  <AccountCircle />
-                </ListItemIcon>
-                <ListItemText primary={"My Account"} />
-              </ListItem>
+              {!user.isLoggedIn ? (
+                <React.Fragment>
+                  <ListButton
+                    onClick={() => {
+                      navigate("/login");
+                    }}
+                    icon={<AccountCircle />}
+                    primary="Login"
+                    disabled={location.pathname === "/login"}
+                    button
+                  />
+
+                  <ListButton
+                    onClick={() => {
+                      navigate("/sign-up");
+                    }}
+                    disabled={location.pathname === "/sign-up"}
+                    icon={<GroupAdd />}
+                    primary="Sign up"
+                    button
+                  />
+                </React.Fragment>
+              ) : (
+                <ListButton
+                  onClick={() => {
+                    dispatch(userActions.logout());
+                    navigate("/login");
+                  }}
+                  icon={<ExitToApp />}
+                  primary="logout"
+                  button
+                />
+              )}
             </List>
           </Box>
         </Drawer>

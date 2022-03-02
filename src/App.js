@@ -1,45 +1,57 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CareerPrediction from "./components/career prediction/CareerPrediction";
+import CareerPathway from "./components/career prediction/CareerPathway";
 import Dashboard from "./components/layout/Dashboard";
 import Login from "./components/login/Login";
 import SignUp from "./components/login/SignUp";
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "./store/user-slice";
+import axios from "axios";
 
 const App = () => {
-  const [usersList, setUsersList] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const fetchUsersListHandler = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // const response = await fetch("https://sih-api.herokuapp.com/api/data", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     marks: "0",
-      //     status: "0",
-      //     personality: "0",
-      //     agree: "0",
-      //     aoi: "0",
-      //     opens: "0",
-      //   }),
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
-      // if (response.status !== 200 || response.status !== 201) {
-      //   throw new Error("Something went wrong!");
-      // }
-
-      // const loadedUsersList = response;
-      // console.log(response);
-      // setUsersList(loadedUsersList);
-    } catch (error) {
-      setError(error.message);
+    if (localStorage.getItem("token")) {
+      dispatch(
+        userActions.login({
+          userAuthInfo: {
+            token: localStorage.getItem("token"),
+            userId: localStorage.getItem("userId"),
+            name: localStorage.getItem("name"),
+          },
+        })
+      );
+      const expiryDate = localStorage.getItem("expiryDate");
+      if (new Date(expiryDate) <= new Date()) {
+        dispatch(userActions.logout());
+        return;
+      }
     }
-    setIsLoading(false);
-  }, []);
+    if (user.userAuthInfo.token && user.isLoggedIn) {
+      //get request
+      axios
+        .get("https://sih-api.herokuapp.com/api/output", {
+          headers: {
+            Authorization:
+              "Bearer " +
+              (localStorage.getItem("token") || user.userAuthInfo.token),
+          },
+        })
+        .then((response) => {
+          const mlOutput = response.data.result;
+          dispatch(
+            userActions.addPathway({
+              prediction: mlOutput.prediction,
+              mean: mlOutput.mean,
+              path: mlOutput.whole1[0].slice(1),
+            })
+          );
+        })
+        .catch((error) => {});
+    }
+  }, [dispatch, user.isLoggedIn, user.userAuthInfo.token]);
 
   useEffect(() => {
     fetchUsersListHandler();
@@ -60,7 +72,8 @@ const App = () => {
         <Route path="/career-prediction" />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/predict-career" element={<CareerPrediction />} />
+        <Route path="/predict-career" exact element={<CareerPrediction />} />
+        <Route path="/predict-career/pathway" element={<CareerPathway />} />
       </Routes>
     </Router>
   );

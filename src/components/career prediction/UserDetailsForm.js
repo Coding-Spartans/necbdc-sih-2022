@@ -1,8 +1,12 @@
-import React, { useState } from "react";
-import { Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Button, CircularProgress } from "@mui/material";
 import classes from "./UserDetailsForm.module.css";
 import RadioButton from "../UI/RadioButton";
 import AutoCompleteField from "./AutoCompleteField";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "../../store/user-slice";
+import { useNavigate } from "react-router-dom";
 
 const radioQuestions = [
   {
@@ -62,6 +66,22 @@ const radioQuestions = [
 const UserDetailsForm = () => {
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
+  const [responseError, setResponseError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      navigate("/login");
+    }
+ 
+  }, [
+    navigate,
+    user.isLoggedIn,
+    user.userPath.path.length,
+    user.userPath.prediction.length,
+  ]);
   const answerSelectHandler = (question, answer) => {
     setAnswers((prevState) => {
       return { ...prevState, [`${question}`]: answer };
@@ -69,6 +89,8 @@ const UserDetailsForm = () => {
   };
   const submitHandler = (event) => {
     setError(false);
+    setResponseError(false);
+    setLoading(true);
     const questions = [];
     radioQuestions.forEach((question) => {
       questions.push(question.headerLabel);
@@ -81,8 +103,44 @@ const UserDetailsForm = () => {
       !answers["Area of interest"]
     ) {
       setError(true);
+      setLoading(false);
+      setResponseError(false);
       return;
     }
+    const answersArray = questions.map((question) => +answers[question]);
+    axios
+      .post("https://forestclassifier-api.herokuapp.com/post", {
+        input: [...answersArray],
+      })
+      .then((response) => {
+        const mlOutput = response.data;
+        dispatch(
+          userActions.addPathway({
+            prediction: mlOutput.prediction,
+            mean: mlOutput.mean,
+            path: mlOutput.whole1[0].slice(1),
+          })
+        );
+        axios
+          .post(
+            "https://sih-api.herokuapp.com/api/output",
+            { ...mlOutput },
+            {
+              headers: {
+                Authorization: "Bearer " + user.userAuthInfo.token,
+              },
+            }
+          )
+          .then((response) => {
+            navigate("/predict-career/pathway");
+          });
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log(error);
+        setResponseError("Something went wrong :(");
+      });
+    // https://forestclassifier-api.herokuapp.com/post
   };
   return (
     <div className={classes.formContainer}>
@@ -108,13 +166,23 @@ const UserDetailsForm = () => {
           error={error}
           chosenInterest={answers["Area of interest"]}
         />
+        {responseError ? (
+          <div className={classes.responseError}>{responseError}</div>
+        ) : null}
         <div className={classes.userDetailsForm_actions}>
           <Button
             className={classes.formButton + " " + classes.signIn}
             variant="contained"
             onClick={submitHandler}
           >
-            predict
+            {loading ? (
+              <CircularProgress
+                sx={{ width: "25px!important", height: "25px!important" }}
+                color="inherit"
+              />
+            ) : (
+              "predict"
+            )}
           </Button>
         </div>
       </div>
