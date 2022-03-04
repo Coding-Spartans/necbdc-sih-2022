@@ -35,7 +35,6 @@ const areaOfInterests = [
   { value: 14, area: "Technology" },
   { value: 12, area: "Transporatation" },
   { value: 11, area: "Water management" },
-  { value: 32, area: "None" },
 ];
 const theme = createTheme({
   typography: {
@@ -56,9 +55,15 @@ export default function AutocompleteField(props) {
         renderInput={(params) => (
           <TextField
             {...params}
-            error={props.error && !props.chosenInterest}
+            error={
+              props.error &&
+              (props.chosenInterest === undefined ||
+                props.chosenInterest === null)
+            }
             helperText={
-              props.error && !props.chosenInterest
+              props.error &&
+              (props.chosenInterest === undefined ||
+                props.chosenInterest === null)
                 ? "Enter your area of Interest"
                 : ""
             }

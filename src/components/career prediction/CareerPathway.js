@@ -5,10 +5,12 @@ import Pathway from "./PathwayDepiction";
 import classes from "./Pathway.module.css";
 import CareerStepper from "./CareerStepper";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 let tmp;
 
 const CareerPathway = (props) => {
   let strokeDashoffset = 458;
+  const navigate = useNavigate();
   const pathway = useSelector((state) => state.user.userPath);
   const [currentStep, setCurrentStep] = useState(1);
   const [openPopper, setOpenPopper] = useState(1);
@@ -66,6 +68,7 @@ const CareerPathway = (props) => {
                 placement="bottom"
                 className={classes.popper}
                 transition
+                
               >
                 {({ TransitionProps }) => (
                   <Zoom {...TransitionProps}>
@@ -93,6 +96,9 @@ const CareerPathway = (props) => {
             <Button
               className={classes.formButton + " " + classes.signIn}
               variant="contained"
+              onClick={() => {
+                navigate("/predict-career");
+              }}
             >
               predict again
             </Button>

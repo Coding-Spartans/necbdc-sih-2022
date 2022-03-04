@@ -75,7 +75,6 @@ const UserDetailsForm = () => {
     if (!user.isLoggedIn) {
       navigate("/login");
     }
- 
   }, [
     navigate,
     user.isLoggedIn,
@@ -100,7 +99,8 @@ const UserDetailsForm = () => {
 
     if (
       questions.length !== questionsAnswered.length ||
-      !answers["Area of interest"]
+      answers["Area of interest"] === null ||
+      answers["Area of interest"] === undefined
     ) {
       setError(true);
       setLoading(false);

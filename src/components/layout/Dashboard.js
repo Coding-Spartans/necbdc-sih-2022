@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import classes from "./Dashboard.module.css";
 import { useLocation } from "react-router-dom";
 import { useLayoutEffect, useState } from "react";
+import SearchResults from "./SearchResults";
 
 const mdTheme = createTheme();
 let history = [];
@@ -73,6 +74,8 @@ export default function Dashboard(props) {
         <div className={classes.bottomTriangle}></div>
       </div>
       {props.children}
+      {/* <SearchResults /> */}
+
       <Footer />
     </ThemeProvider>
   );
