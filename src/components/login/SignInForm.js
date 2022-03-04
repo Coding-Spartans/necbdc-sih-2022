@@ -58,7 +58,7 @@ const SignInForm = () => {
       .then((res) => {
         const userData = res.data;
         const expiryDate = new Date(
-          new Date().getTime() + 5 * 24 * 60 * 60 * 1000
+          new Date().getTime() + 7 * 24 * 60 * 60 * 1000
         );
         localStorage.setItem("token", userData.token);
         localStorage.setItem("name", userData.name);
