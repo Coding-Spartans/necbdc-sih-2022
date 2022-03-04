@@ -23,8 +23,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 Profession-data.csv
-.firebaserc
 firebase.js
 firebase.json
-/.firebase
-/.vscode
+.firebase
+.vscode
+.firebase/hosting.YnVpbGQ.cache
+.firebaserc
+build/
