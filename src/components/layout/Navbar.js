@@ -91,12 +91,18 @@ export default function Navbar(props) {
   const openLoginPage = () => {
     handleMenuClose();
     if (props.pathname !== "/login") props.onEnterOut();
-
     if (props.pathname === "/predict-career") navigate("/login");
     else
       setTimeout(() => {
         navigate("/login");
       }, 400);
+  };
+  const predictCareerHandler = () => {
+    if (user.isLoggedIn)
+      if (user.userPath.prediction.length || user.userPath.path.length)
+        navigate("/predict-career/pathway");
+      else navigate("/predict-career");
+    else openLoginPage();
   };
   const menuId = "primary-search-account-menu";
   return (
@@ -139,16 +145,8 @@ export default function Navbar(props) {
               />
             </Search>
             <Box sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}>
-              <div className={classes.logo}>
-                <Link
-                  to={
-                    user.userPath.prediction.length || user.userPath.path.length
-                      ? "/predict-career/pathway"
-                      : "/predict-career"
-                  }
-                >
-                  Predict your career
-                </Link>
+              <div className={classes.logo} onClick={predictCareerHandler}>
+                Predict your career
               </div>
             </Box>
             {user.isLoggedIn ? (

@@ -27,6 +27,9 @@ const userSlice = createSlice({
       state.userAuthInfo.token = "";
       state.userAuthInfo.name = "";
       state.userAuthInfo.userId = "";
+      state.userPath.mean = "";
+      state.userPath.path = [];
+      state.userPath.prediction = "";
     },
     addPathway(state, action) {
       state.userPath.mean = action.payload.mean;

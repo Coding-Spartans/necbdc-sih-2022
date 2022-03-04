@@ -64,7 +64,7 @@ const App = () => {
           exact
           element={
             <Dashboard
-              smallText="Lorem ipsum dolor sit amet consectetur, adipisicing elit."
+              smallText="Picking the right career is what makes one’s life successful."
               header="Predict your career now!"
             />
           }
