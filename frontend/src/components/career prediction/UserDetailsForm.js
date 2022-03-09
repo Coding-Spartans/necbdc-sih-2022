@@ -20,7 +20,7 @@ const radioQuestions = [
   {
     headerLabel: "Economic Stability",
     options: [
-      { label: "Chronic poor (Poor)", value: 0 },
+      { label: "Economically weak", value: 0 },
       {
         label: "Transient poor (Hard situations might make them poor)",
         value: 1,

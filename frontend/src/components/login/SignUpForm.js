@@ -1,89 +1,90 @@
 import React, { useState } from "react";
 import { Button, CircularProgress, TextField } from "@mui/material";
-import classes from "./SignInForm.module.css";
+import classes from "./SignUpForm.module.css";
 import FacebookIcon from "./FacebookIcon";
 import AppleIcon from "./AppleIcon";
 import GoogleIcon from "./GoogleIcon";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { userActions } from "../../store/user-slice";
 import axios from "axios";
 
-const SignInForm = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const SignUpForm = () => {
+  const [enteredUserName, setEnteredUserName] = useState("");
   const [enteredEmail, setEnteredEmail] = useState("");
   const [enteredPassword, setEnteredPassword] = useState("");
+  const [enteredConfirmPassword, setEnteredConfirmPassword] = useState("");
+  const [userNameError, setUserNameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
   const [responseError, setResponseError] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const isEmpty = (text) => text.trim().length === 0;
-  const isPasswordCorrect = (password) => {
-    if (password.length < 8) {
+  const isPasswordCorrect = () => {
+    if (enteredPassword.length < 8) {
       setEnteredPassword("");
       setPasswordError("Password is less than 8 characters");
       return true;
+    } else if (enteredPassword !== enteredConfirmPassword) {
+      setEnteredConfirmPassword("");
+      setConfirmPasswordError("Passwords are not matching");
+      return true;
     }
+
     return false;
   };
 
   const submitHandler = (event) => {
     event.preventDefault();
+    setUserNameError(false);
+    setLoading(true);
     setEmailError(false);
     setPasswordError(false);
-    setLoading(true);
+    setConfirmPasswordError(false);
     setResponseError(false);
+    if (isEmpty(enteredUserName)) {
+      setEnteredUserName("");
+      setUserNameError("Enter a valid user name");
+    }
     if (isEmpty(enteredEmail)) {
       setEnteredEmail("");
       setEmailError("Enter a valid email");
     }
-    isPasswordCorrect(enteredPassword);
-    if (isEmpty(enteredEmail) || isPasswordCorrect(enteredPassword)) {
-      setLoading(false);
+    isPasswordCorrect();
+    if (
+      isEmpty(enteredUserName) ||
+      isEmpty(enteredEmail) ||
+      isPasswordCorrect()
+    ) {
       setResponseError(false);
+      setLoading(false);
       return;
     }
-    dispatch(
-      userActions.login({
-        userAuthInfo: { email: enteredEmail, password: enteredPassword },
-      })
-    );
     axios
-      .post("https://sih-api.herokuapp.com/auth/login", {
+      .post("https://sih-api.herokuapp.com/auth/signup", {
+        name: enteredUserName.trim(),
         email: enteredEmail.trim(),
         password: enteredPassword,
+        cpassword: enteredConfirmPassword,
       })
       .then((res) => {
-        const userData = res.data;
-        const expiryDate = new Date(
-          new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-        );
-        localStorage.setItem("token", userData.token);
-        localStorage.setItem("name", userData.name);
-        localStorage.setItem("userId", userData.userId);
-        localStorage.setItem("expiryDate", expiryDate.toISOString());
-        dispatch(
-          userActions.login({
-            userAuthInfo: {
-              token: userData.token,
-              userId: userData.userId,
-              name: userData.name,
-            },
-          })
-        );
-        navigate("/");
+        navigate("/login");
       })
       .catch((error) => {
         setLoading(false);
-        setResponseError("Something went wrong :(");
+        if (error.message.includes(422)) {
+          setUserNameError(true);
+          setEmailError(true);
+          setResponseError("User name or Email already exists");
+        } else setResponseError("Something went wrong :(");
       });
   };
   return (
     <div className={classes.formContainer}>
       <div className={classes.form}>
-        <h5>Sign in</h5>
+        <h5>Sign up</h5>
         <div className={classes.thirdPartyServices}>
           <Button>
             <FacebookIcon />
@@ -98,9 +99,22 @@ const SignInForm = () => {
         <form onSubmit={submitHandler}>
           <TextField
             variant="outlined"
-            label="Email"
-            type="email"
+            label="User Name"
             size="small"
+            type="text"
+            onChange={(event) => {
+              setEnteredUserName(event.target.value);
+            }}
+            value={enteredUserName}
+            error={userNameError}
+            helperText={userNameError}
+            className={classes.textField}
+          />
+          <TextField
+            variant="outlined"
+            label="Email"
+            size="small"
+            type="email"
             onChange={(event) => {
               setEnteredEmail(event.target.value);
             }}
@@ -110,23 +124,36 @@ const SignInForm = () => {
             className={classes.textField}
           />
           <TextField
-            type="password"
             variant="outlined"
             label="Password"
             size="small"
+            type="password"
             onChange={(event) => {
               setEnteredPassword(event.target.value);
             }}
             value={enteredPassword}
             error={passwordError}
             helperText={passwordError}
+            className={classes.textField}
+          />
+          <TextField
+            variant="outlined"
+            label="Confirm password"
+            size="small"
+            type="password"
+            onChange={(event) => {
+              setEnteredConfirmPassword(event.target.value);
+            }}
+            value={enteredConfirmPassword}
+            error={confirmPasswordError}
+            helperText={confirmPasswordError}
           />
           {responseError ? (
             <div className={classes.responseError}>{responseError}</div>
           ) : null}
           <Button
             type="submit"
-            className={classes.formButton + " " + classes.signIn}
+            className={classes.formButton + " " + classes.signUp}
             variant="contained"
           >
             {loading ? (
@@ -135,7 +162,7 @@ const SignInForm = () => {
                 color="inherit"
               />
             ) : (
-              "Sign In"
+              "Sign Up"
             )}
           </Button>
         </form>
@@ -146,17 +173,17 @@ const SignInForm = () => {
           </div>
         </div>
         <Button
-          className={classes.formButton + " " + classes.signUp}
-          variant="contained"
           onClick={() => {
-            navigate("/sign-up");
+            navigate("/login");
           }}
+          className={classes.formButton + " " + classes.signIn}
+          variant="contained"
         >
-          Sign up
+          Sign in
         </Button>
       </div>
     </div>
   );
 };
 
-export default SignInForm;
+export default SignUpForm;

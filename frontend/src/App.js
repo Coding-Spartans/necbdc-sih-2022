@@ -8,11 +8,29 @@ import SignUp from "./components/login/SignUp";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "./store/user-slice";
 import axios from "axios";
+import CareerLibrary from "./components/Career library/CareerLibrary";
+import CareerDomain from "./components/Career library/CareerDomain";
+import DomainInfo from "./components/Career library/DomainInfo";
 
 const App = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const fetchUsersListHandler = useCallback(async () => {
+    axios
+      .get("https://sih-api.herokuapp.com/portal/data")
+      .then((response) => {
+        const careerLibraryData = response.data.data;
+        const convertedData = {};
+        careerLibraryData.forEach((career) => {
+          convertedData[career.domainName] = { ...career };
+        });
+        dispatch(
+          userActions.addCareerLibraryData({ careerLibraryData: convertedData })
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     if (localStorage.getItem("token")) {
       dispatch(
         userActions.login({
@@ -49,7 +67,9 @@ const App = () => {
             })
           );
         })
-        .catch((error) => {});
+        .catch((error) => {
+          console.log(error);
+        });
     }
   }, [dispatch, user.isLoggedIn, user.userAuthInfo.token]);
 
@@ -72,8 +92,14 @@ const App = () => {
         <Route path="/career-prediction" />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/predict-career" exact element={<CareerPrediction />} />
+        <Route path="/predict-career" element={<CareerPrediction />} />
         <Route path="/predict-career/pathway" element={<CareerPathway />} />
+        <Route path="/career-library" element={<CareerLibrary />} />
+        <Route path="/career-library/:careerPath" element={<CareerDomain />} />
+        <Route
+          path="/career-library/:careerPath/:subDomain"
+          element={<DomainInfo />}
+        />
       </Routes>
     </Router>
   );

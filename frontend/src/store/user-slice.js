@@ -10,6 +10,7 @@ const userSlice = createSlice({
       path: [],
       prediction: "",
     },
+    careerLibraryData: {},
   },
   reducers: {
     login(state, action) {
@@ -35,6 +36,9 @@ const userSlice = createSlice({
       state.userPath.mean = action.payload.mean;
       state.userPath.path = action.payload.path;
       state.userPath.prediction = action.payload.prediction;
+    },
+    addCareerLibraryData(state, action) {
+      state.careerLibraryData = action.payload.careerLibraryData;
     },
   },
 });

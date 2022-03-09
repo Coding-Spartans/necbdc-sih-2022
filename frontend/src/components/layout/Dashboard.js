@@ -2,7 +2,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import classes from "./Dashboard.module.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useLayoutEffect, useState } from "react";
 import NavCard from "../home/NavCard";
 
@@ -11,11 +11,18 @@ let history = [];
 export default function Dashboard(props) {
   const [animation, setAnimation] = useState("");
   const location = useLocation();
-
+  const { careerPath, subDomain } = useParams();
   useLayoutEffect(() => {
     history.push(location.pathname);
 
-    if (location.pathname === "/predict-career") {
+    if (
+      location.pathname === "/predict-career" ||
+      location.pathname ===
+        `/career-library/${careerPath?.replaceAll(
+          " ",
+          "%20"
+        )}/${subDomain?.replaceAll(" ", "%20")}`
+    ) {
       if (history[history.length - 2]) {
         setAnimation(classes.predictCareer);
       } else {
@@ -46,20 +53,26 @@ export default function Dashboard(props) {
       } else if (location.pathname === "/login") {
         setAnimation(classes.signIn);
       } else if (
-        location.pathname === "/predict-career/pathway" &&
-        history[history.length - 2] === "/predict-career"
+        (location.pathname === "/predict-career/pathway" &&
+          history[history.length - 2] === "/predict-career") ||
+        location.pathname ===
+          `/career-library/${careerPath?.replaceAll(" ", "%20")}`
       ) {
         setAnimation(classes.predictCareer_rev);
       }
     }
   }, [location.pathname]);
-
+  
   const enterOutAnimation = () => {
     setAnimation(classes.homeAnimation);
   };
   return (
     <ThemeProvider theme={mdTheme}>
-      <div className={classes.dashboardContainer + " " + animation}>
+      <div
+        className={`${classes.dashboardContainer} ${animation} ${
+          classes[careerPath?.split(" ")[0]]
+        } ${careerPath && classes.careerPath} ${subDomain && classes.subDomain}`}
+      >
         <Navbar onEnterOut={enterOutAnimation} pathname={location.pathname} />
 
         <div className={classes.bottomContainer}>

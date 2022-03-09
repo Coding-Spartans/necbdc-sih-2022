@@ -12,14 +12,19 @@ const NavCard = (props) => {
       if (user.isLoggedIn)
         if (user.userPath.prediction.length || user.userPath.path.length)
           navigate("/predict-career/pathway");
-        else navigate("/predict-career")
+        else navigate("/predict-career");
       else {
         props.onEnterOut();
         setTimeout(() => {
           navigate("/login");
         }, 400);
       }
-    else navigate(props.to);
+    else {
+      props.onEnterOut();
+      setTimeout(() => {
+        navigate(props.to);
+      }, 400);
+    }
   };
   return (
     <div
