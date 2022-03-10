@@ -11,26 +11,32 @@ import axios from "axios";
 import CareerLibrary from "./components/Career library/CareerLibrary";
 import CareerDomain from "./components/Career library/CareerDomain";
 import DomainInfo from "./components/Career library/DomainInfo";
+import SearchResults from "./components/layout/SearchResult";
+import data from "./data.json";
 
 const App = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const fetchUsersListHandler = useCallback(async () => {
-    axios
-      .get("https://sih-api.herokuapp.com/portal/data")
-      .then((response) => {
-        const careerLibraryData = response.data.data;
-        const convertedData = {};
-        careerLibraryData.forEach((career) => {
-          convertedData[career.domainName] = { ...career };
-        });
-        dispatch(
-          userActions.addCareerLibraryData({ careerLibraryData: convertedData })
-        );
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const fetchCareerDataHandler = useCallback(async () => {
+    const careerLibraryData = data.data;
+    const convertedData = {};
+    careerLibraryData.forEach((career) => {
+      convertedData[career.domainName] = { ...career };
+    });
+    dispatch(
+      userActions.addCareerLibraryData({ careerLibraryData: convertedData })
+    );
+    
+    // axios
+    //   .get("https://sih-api.herokuapp.com/portal/data")
+    //   .then((response) => {
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+
+  }, [dispatch]);
+  const fetchUserDataHandler = useCallback(async () => {
     if (localStorage.getItem("token")) {
       dispatch(
         userActions.login({
@@ -74,8 +80,11 @@ const App = () => {
   }, [dispatch, user.isLoggedIn, user.userAuthInfo.token]);
 
   useEffect(() => {
-    fetchUsersListHandler();
-  }, [fetchUsersListHandler]);
+    fetchUserDataHandler();
+  }, [fetchUserDataHandler]);
+  useEffect(() => {
+    fetchCareerDataHandler();
+  }, [fetchCareerDataHandler]);
   return (
     <Router>
       <Routes>
@@ -100,6 +109,7 @@ const App = () => {
           path="/career-library/:careerPath/:subDomain"
           element={<DomainInfo />}
         />
+        <Route path="/search" element={<SearchResults />} />
       </Routes>
     </Router>
   );

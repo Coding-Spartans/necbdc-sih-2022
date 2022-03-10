@@ -71,11 +71,13 @@ const ListButton = (props) => (
   </ListItem>
 );
 
-export default function Navbar(props) {
+export default React.memo(function Navbar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [navigateToSearch, setNavigateToSearch] = React.useState("");
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   let navigate = useNavigate();
+  const searchRef = React.useRef();
   let location = useLocation();
 
   const isMenuOpen = Boolean(anchorEl);
@@ -90,8 +92,8 @@ export default function Navbar(props) {
 
   const openLoginPage = () => {
     handleMenuClose();
-    if (props.pathname !== "/login") props.onEnterOut();
-    if (props.pathname === "/predict-career") navigate("/login");
+    if (location.pathname !== "/login") props.onEnterOut();
+    if (location.pathname === "/predict-career") navigate("/login");
     else
       setTimeout(() => {
         navigate("/login");
@@ -103,6 +105,24 @@ export default function Navbar(props) {
         navigate("/predict-career/pathway");
       else navigate("/predict-career");
     else openLoginPage();
+  };
+  if (location.pathName === "/search") {
+  }
+  React.useLayoutEffect(() => {
+  }, [location.pathName]);
+  const onSearchHandler = (event) => {
+    dispatch(userActions.search(event.target.value));
+    if (
+      navigateToSearch === "User entered the search bar" &&
+      event.target.value.length === 1
+    ) {
+      setNavigateToSearch("Key pressed");
+      navigate("/search");
+    }
+  };
+  const onEnterSearchBarHandler = () => {
+    console.log("hello");
+    setNavigateToSearch("User entered the search bar");
   };
   const menuId = "primary-search-account-menu";
   return (
@@ -116,6 +136,7 @@ export default function Navbar(props) {
           className={classes.navBar}
           position="static"
         >
+          
           <Toolbar>
             <div className={classes.logo}>
               {window.innerWidth > 1000 ? (
@@ -134,11 +155,15 @@ export default function Navbar(props) {
                 </IconButton>
               )}
             </div>
-            <Search>
+            <Search
+              onChange={onSearchHandler}
+              onClick={onEnterSearchBarHandler}
+            >
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
               <StyledInputBase
+                ref={searchRef}
                 sx={{ width: { sm: "30rem", xl: "40rem" } }}
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
@@ -267,4 +292,4 @@ export default function Navbar(props) {
       <Box></Box>
     </React.Fragment>
   );
-}
+});

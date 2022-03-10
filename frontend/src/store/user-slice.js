@@ -11,6 +11,9 @@ const userSlice = createSlice({
       prediction: "",
     },
     careerLibraryData: {},
+    searchCareerLibraryData: [],
+    searchResults: [],
+    filterText: "",
   },
   reducers: {
     login(state, action) {
@@ -39,6 +42,23 @@ const userSlice = createSlice({
     },
     addCareerLibraryData(state, action) {
       state.careerLibraryData = action.payload.careerLibraryData;
+      const careerLibraryData = { ...state.careerLibraryData };
+      Object.keys(careerLibraryData).forEach((domain) => {
+        state.searchCareerLibraryData = [
+          state.searchCareerLibraryData,
+          ...careerLibraryData[domain].subDomains.map((subDomain) => {
+            subDomain.domainName = domain;
+            return subDomain;
+          }),
+        ];
+      });
+      console.log(state.searchCareerLibraryData);
+    },
+    search(state, action) {
+      state.filterText = action.payload;
+      state.searchResults = state.searchCareerLibraryData.filter((career) =>
+        career.name?.includes(state.filterText)
+      );
     },
   },
 });

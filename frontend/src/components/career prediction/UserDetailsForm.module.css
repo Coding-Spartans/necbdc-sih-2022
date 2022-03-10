@@ -191,7 +191,13 @@
   margin-top: 1.2rem;
   margin-bottom: -1.5rem;
 }
-
+.question label {
+  /* color: black; */
+  font-weight: 400 !important;
+}
+.question {
+  margin-bottom: 1rem !important;
+}
 @keyframes opening {
   0% {
     opacity: 0;
