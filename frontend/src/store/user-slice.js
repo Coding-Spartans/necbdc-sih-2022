@@ -45,19 +45,22 @@ const userSlice = createSlice({
       const careerLibraryData = { ...state.careerLibraryData };
       Object.keys(careerLibraryData).forEach((domain) => {
         state.searchCareerLibraryData = [
-          state.searchCareerLibraryData,
+          ...state.searchCareerLibraryData,
           ...careerLibraryData[domain].subDomains.map((subDomain) => {
             subDomain.domainName = domain;
             return subDomain;
           }),
         ];
       });
-      console.log(state.searchCareerLibraryData);
     },
     search(state, action) {
       state.filterText = action.payload;
-      state.searchResults = state.searchCareerLibraryData.filter((career) =>
-        career.name?.includes(state.filterText)
+      state.searchResults = state.searchCareerLibraryData.filter(
+        (career) =>
+          career.name?.toLowerCase().includes(state.filterText.toLowerCase()) ||
+          career.domainName
+            ?.toLowerCase()
+            .includes(state.filterText.toLowerCase())
       );
     },
   },

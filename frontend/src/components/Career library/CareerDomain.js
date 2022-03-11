@@ -15,6 +15,7 @@ const cardColor = {
 };
 
 const CareerDomain = () => {
+  
   const { careerPath } = useParams();
   const careerLibraryData = useSelector(
     (state) => state.user.careerLibraryData

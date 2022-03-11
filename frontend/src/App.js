@@ -18,23 +18,21 @@ const App = () => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const fetchCareerDataHandler = useCallback(async () => {
-    const careerLibraryData = data.data;
-    const convertedData = {};
-    careerLibraryData.forEach((career) => {
-      convertedData[career.domainName] = { ...career };
-    });
-    dispatch(
-      userActions.addCareerLibraryData({ careerLibraryData: convertedData })
-    );
-    
-    // axios
-    //   .get("https://sih-api.herokuapp.com/portal/data")
-    //   .then((response) => {
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
-
+    axios
+      .get("https://sih-api.herokuapp.com/portal/data")
+      .then((response) => {
+        const careerLibraryData = response.data.data;
+        const convertedData = {};
+        careerLibraryData.forEach((career) => {
+          convertedData[career.domainName] = { ...career };
+        });
+        dispatch(
+          userActions.addCareerLibraryData({ careerLibraryData: convertedData })
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, [dispatch]);
   const fetchUserDataHandler = useCallback(async () => {
     if (localStorage.getItem("token")) {
@@ -68,8 +66,8 @@ const App = () => {
           dispatch(
             userActions.addPathway({
               prediction: mlOutput.prediction,
-              mean: mlOutput.mean,
-              path: mlOutput.whole1[0].slice(1),
+              mean: "",
+              path: [],
             })
           );
         })

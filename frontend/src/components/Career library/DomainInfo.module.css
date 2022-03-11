@@ -1,5 +1,8 @@
+.domainInfoContainer {
+  margin-top: -13rem;
+}
 .domainAbout {
-  width: calc(100% - 2rem);
+  width: calc(100% - 8rem);
   color: rgba(0, 0, 0, 0.87);
   animation: opening 0.7s cubic-bezier(0, 0, 0.1, 1) forwards;
   margin-left: auto;
@@ -14,6 +17,7 @@
   background-color: rgb(255, 255, 255);
   border: 0px solid rgba(0, 0, 0, 0.125);
   border-radius: 1rem;
+  /* align-items: center; */
   box-shadow: rgb(0 0 0 / 10%) 0rem 1.25rem 1.6875rem 0rem;
 }
 .domainImage img {
@@ -34,7 +38,19 @@
 .domainDesc {
   letter-spacing: 0.1px;
   line-height: 1.6;
+  margin-top: 1rem;
 }
+@keyframes opening {
+  0% {
+    opacity: 0;
+    transform: translateY(40%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
 @media (max-width: 1000px) {
   .domainAbout {
     flex-direction: column;
@@ -54,6 +70,31 @@
     text-align: center;
   }
   .domainInfoContainer {
-      margin-top: 1rem
+    margin-top: 1rem;
+  }
+}
+@media (max-width: 1000px) {
+  .domainAbout {
+    width: 80%;
+  }
+}
+@media (max-width: 700px) {
+  .domainAbout {
+    width: 90%;
+  }
+}
+@media (max-width: 600px) {
+  .domainAbout {
+    width: 100%;
+    box-shadow: none;
+    font-size: 0.9rem;
+    border-radius: 0;
+  }
+  .domainInfoContainer {
+    padding: 0;
+    width: 100%;
+    position: absolute;
+    top: 61px;
+    margin-top: 0;
   }
 }

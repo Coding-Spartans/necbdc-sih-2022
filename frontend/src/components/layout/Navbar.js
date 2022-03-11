@@ -11,6 +11,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import classes from "./Navbar.module.css";
 import {
+  Button,
   Divider,
   Drawer,
   List,
@@ -73,7 +74,6 @@ const ListButton = (props) => (
 
 export default React.memo(function Navbar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [navigateToSearch, setNavigateToSearch] = React.useState("");
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   let navigate = useNavigate();
@@ -99,30 +99,22 @@ export default React.memo(function Navbar(props) {
         navigate("/login");
       }, 400);
   };
-  const predictCareerHandler = () => {
-    if (user.isLoggedIn)
-      if (user.userPath.prediction.length || user.userPath.path.length)
-        navigate("/predict-career/pathway");
-      else navigate("/predict-career");
-    else openLoginPage();
-  };
-  if (location.pathName === "/search") {
-  }
-  React.useLayoutEffect(() => {
-  }, [location.pathName]);
+  // const predictCareerHandler = () => {
+  //   if (user.isLoggedIn)
+  //     if (user.userPath.prediction.length || user.userPath.path.length)
+  //       navigate("/predict-career/pathway");
+  //     else navigate("/predict-career");
+  //   else openLoginPage();
+  // };
+  React.useEffect(() => {}, [location.pathName]);
   const onSearchHandler = (event) => {
     dispatch(userActions.search(event.target.value));
-    if (
-      navigateToSearch === "User entered the search bar" &&
-      event.target.value.length === 1
-    ) {
-      setNavigateToSearch("Key pressed");
-      navigate("/search");
-    }
   };
   const onEnterSearchBarHandler = () => {
-    console.log("hello");
-    setNavigateToSearch("User entered the search bar");
+    if (location.pathname !== "/search") {
+      dispatch(userActions.search(""));
+      navigate("/search");
+    }
   };
   const menuId = "primary-search-account-menu";
   return (
@@ -136,7 +128,6 @@ export default React.memo(function Navbar(props) {
           className={classes.navBar}
           position="static"
         >
-          
           <Toolbar>
             <div className={classes.logo}>
               {window.innerWidth > 1000 ? (
@@ -155,25 +146,24 @@ export default React.memo(function Navbar(props) {
                 </IconButton>
               )}
             </div>
-            <Search
-              onChange={onSearchHandler}
-              onClick={onEnterSearchBarHandler}
-            >
+            <Search onChange={onSearchHandler}>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
               <StyledInputBase
-                ref={searchRef}
+                onFocus={onEnterSearchBarHandler}
+                inputRef={searchRef}
                 sx={{ width: { sm: "30rem", xl: "40rem" } }}
                 placeholder="Search…"
+                autoFocus={location.pathname === "/search"}
                 inputProps={{ "aria-label": "search" }}
               />
             </Search>
-            <Box sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}>
+            {/* <Box sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}>
               <div className={classes.logo} onClick={predictCareerHandler}>
                 Predict your career
               </div>
-            </Box>
+            </Box> */}
             {user.isLoggedIn ? (
               <React.Fragment>
                 <Box
@@ -198,11 +188,24 @@ export default React.memo(function Navbar(props) {
                 </Box>
               </React.Fragment>
             ) : (
-              <Box sx={{ display: "flex" }}>
-                <div onClick={openLoginPage} className={classes.logo}>
-                  Login
-                </div>
-              </Box>
+              <React.Fragment>
+                <Box
+                  sx={{ display: window.innerWidth > 1000 ? "flex" : "none" }}
+                >
+                  {user.userAuthInfo.name ? (
+                    <div style={{ cursor: "text" }} className={classes.logo}>
+                      {`Hello, ${user.userAuthInfo.name}`}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <div onClick={openLoginPage} className={classes.logo}>
+                    Login
+                  </div>
+                </Box>
+              </React.Fragment>
             )}
           </Toolbar>
         </AppBar>

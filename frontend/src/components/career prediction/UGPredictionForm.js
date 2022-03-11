@@ -9,35 +9,8 @@ import { userActions } from "../../store/user-slice";
 import { useNavigate } from "react-router-dom";
 import NumberQuestion from "./NumberQuestion";
 import AutocompleteField from "./AutoCompleteField";
-
-const predictionQuestions = [
-  {
-    type: "radio",
-    headerLabel: "Openness",
-    options: [
-      { label: "Open in nature", value: 0 },
-      {
-        label: "Opens for need",
-        value: 1,
-      },
-      { label: "Closed nature", value: 2 },
-    ],
-  },
-  {
-    type: "number",
-    headerLabel: "Number Field",
-  },
-  {
-    type: "auto-complete",
-    headerLabel: "Auto Complete",
-    options: [
-      { option: "Field1", value: 0 },
-      { option: "Field2", value: 1 },
-      { option: "Field3", value: 2 },
-    ],
-  },
-];
-
+import { predictionQuestions } from "./predictionQuestions";
+import SliderQuestion from "./SliderQuestion";
 const UGPredictionForm = () => {
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
@@ -47,15 +20,10 @@ const UGPredictionForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!user.isLoggedIn) {
+    if (!user?.isLoggedIn) {
       navigate("/login");
     }
-  }, [
-    navigate,
-    user.isLoggedIn,
-    user.userPath.path.length,
-    user.userPath.prediction.length,
-  ]);
+  }, [navigate, user?.isLoggedIn]);
   const answerSelectHandler = (question, answer) => {
     setAnswers((prevState) => {
       return { ...prevState, [`${question}`]: answer };
@@ -77,46 +45,61 @@ const UGPredictionForm = () => {
       setResponseError(false);
       return;
     }
-    const answersArray = questions.map((question) => +answers[question]);
-    if (null in answers) {
+    let questionNotAnswered = false;
+    const answersArray = questions.map((question) => {
+      if (answers[question] === null || answers[question].length === 0) {
+        questionNotAnswered = true;
+        return null;
+      } else {
+        return answers[question];
+      }
+    });
+    console.log([
+      ...answersArray.slice(0, 33),
+      Math.random() > 0.5 ? "work" : "salary",
+      ...answersArray.slice(33),
+    ]);
+    if (questionNotAnswered) {
       setError(true);
       setLoading(false);
       setResponseError(false);
       return;
     }
-    console.log(answersArray);
-    // axios
-    //   .post("https://forestclassifier-api.herokuapp.com/post", {
-    //     input: [...answersArray],
-    //   })
-    //   .then((response) => {
-    //     const mlOutput = response.data;
-    //     dispatch(
-    //       userActions.addPathway({
-    //         prediction: mlOutput.prediction,
-    //         mean: mlOutput.mean,
-    //         path: mlOutput.whole1[0].slice(1),
-    //       })
-    //     );
-    //     axios
-    //       .post(
-    //         "https://sih-api.herokuapp.com/api/output",
-    //         { ...mlOutput },
-    //         {
-    //           headers: {
-    //             Authorization: "Bearer " + user.userAuthInfo.token,
-    //           },
-    //         }
-    //       )
-    //       .then((response) => {
-    //         navigate("/predict-career/pathway");
-    //       });
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false);
-    //     console.log(error);
-    //     setResponseError("Something went wrong :(");
-    //   });
+    axios
+      .post("https://forestclassifier-api.herokuapp.com/cse", {
+        input: [
+          ...answersArray.slice(0, 33),
+          Math.random() > 0.5 ? "work" : "salary",
+          ...answersArray.slice(33),
+        ],
+      })
+      .then((response) => {
+        const mlOutput = response.data;
+        dispatch(
+          userActions.addPathway({
+            prediction: mlOutput.prediction,
+            mean: 0,
+            path: [],
+          })
+        );
+        navigate("/predict-career/pathway");
+        axios
+          .post(
+            "https://sih-api.herokuapp.com/api/output",
+            { ...mlOutput },
+            {
+              headers: {
+                Authorization: "Bearer " + user.userAuthInfo.token,
+              },
+            }
+          )
+          .then((response) => {});
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log(error);
+        setResponseError("Something went wrong :(");
+      });
     // https://forestclassifier-api.herokuapp.com/post
   };
   return (
@@ -152,7 +135,17 @@ const UGPredictionForm = () => {
                     }}
                   />
                 );
-              case "auto-complete":
+              case "range":
+                return (
+                  <SliderQuestion
+                    key={index}
+                    {...{ ...question, error }}
+                    onSelectAnswer={answerSelectHandler}
+                    error={error}
+                    chosenOption={answers[question.headerLabel]}
+                  />
+                );
+              case "select":
                 return (
                   <AutoCompleteFieldUG
                     key={index}
@@ -167,11 +160,6 @@ const UGPredictionForm = () => {
             }
           })}
         </div>
-        {/* <AutocompleteField
-          onEnterInterest={answerSelectHandler}
-          error={error}
-          chosenInterest={answers["Area of interest"]}
-        /> */}
         {responseError ? (
           <div className={classes.responseError}>{responseError}</div>
         ) : null}

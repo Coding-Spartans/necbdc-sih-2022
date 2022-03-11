@@ -16,7 +16,7 @@ const DomainInfo = () => {
   const subDomainData = subDomainsData[subDomain];
 
   return (
-    <Dashboard>
+    <Dashboard header={subDomain}>
       <div className={classes.domainInfoContainer}>
         <div className={classes.domainAbout}>
           {window.innerWidth <= 500 ? (
@@ -26,15 +26,13 @@ const DomainInfo = () => {
             <img src={subDomainData?.imageUrl} alt="" />
           </div>
           <div>
-            {window.innerWidth > 500 ? (
-              <h1 className={classes.domainHeader}>{subDomain}</h1>
-            ) : null}
             <div className={classes.domainDesc}>
               {subDomainData?.description}
             </div>
           </div>
         </div>
-        <div className={classes.domainPathway}></div>
+        <div className={classes.domainPathway}>
+        </div>
       </div>
     </Dashboard>
   );
