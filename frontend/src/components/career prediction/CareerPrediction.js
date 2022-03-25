@@ -1,7 +1,7 @@
 import React from "react";
 import Dashboard from "../layout/Dashboard";
 import UGPredictionForm from "./UGPredictionForm";
-import UserDetailsForm from "./UserDetailsForm";
+// import UserDetailsForm from "./UserDetailsForm";
 
 const CareerPrediction = () => {
   return (

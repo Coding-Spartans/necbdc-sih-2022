@@ -21,9 +21,12 @@ const NumberQuestion = (props) => {
         {props.headerLabel}*
       </FormLabel>
       <TextField
-        variant="standard"
+        variant={props.type === "textarea" ? "outlined" : "standard"}
         // label={props.headerLabel}
+        sx={{ marginTop: props.type === "textarea" ? "1rem" : "0" }}
         type={props.type}
+        multiline={props.type === "textarea"}
+        rows={props.type === "textarea" ? 4 : 1}
         size="small"
         onChange={(event) => {
           if (+event.target.value)
@@ -35,10 +38,9 @@ const NumberQuestion = (props) => {
           props.error && !props.selectedAnswer ? "Enter a valid answer" : ""
         }
         placeholder={
-          "Enter " +
-          (props.headerLabel.toLowerCase().includes("percentage")
-            ? "percentage"
-            : "answer")
+          props.headerLabel.toLowerCase().includes("percentage")
+            ? "Enter percentage"
+            : props.paramLabel || "Enter answer"
         }
       />
     </div>

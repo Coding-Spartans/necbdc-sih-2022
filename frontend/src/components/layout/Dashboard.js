@@ -15,10 +15,12 @@ export default function Dashboard(props) {
     // console.log(location.pathname);
     if (
       location.pathname === "/predict-career" ||
-      // location.pathname ===
-      //   `/career-library/${careerPath
-      //     ?.replaceAll(" ", "%20")
-      //     .replaceAll("|", "%7C")}/${subDomain?.replaceAll(" ", "%20")}` ||
+      location.pathname ===
+        `/career-library/${careerPath
+          ?.replaceAll(" ", "%20")
+          .replaceAll("|", "%7C")}/${subDomain
+          ?.replaceAll(" ", "%20")
+          .replaceAll("|", "%7C")}` ||
       location.pathname === "/search"
     ) {
       if (history[history.length - 2]) {
@@ -52,8 +54,8 @@ export default function Dashboard(props) {
       } else if (location.pathname === "/login") {
         setAnimation(classes.signIn);
       } else if (
-        (location.pathname === "/predict-career/pathway" &&
-          history[history.length - 2] === "/predict-career") 
+        location.pathname === "/predict-career/pathway" &&
+        history[history.length - 2] === "/predict-career"
         //   ||
         // location.pathname ===
         //   `/career-library/${careerPath

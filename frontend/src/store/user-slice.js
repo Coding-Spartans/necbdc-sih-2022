@@ -9,6 +9,7 @@ const userSlice = createSlice({
       mean: "",
       path: [],
       prediction: "",
+      jobsAvailable: [],
     },
     careerLibraryData: {},
     searchCareerLibraryData: [],
@@ -37,8 +38,8 @@ const userSlice = createSlice({
     },
     addPathway(state, action) {
       state.userPath.mean = action.payload.mean;
-      state.userPath.path = action.payload.path;
       state.userPath.prediction = action.payload.prediction;
+      state.userPath.jobsAvailable = action.payload.jobsAvailable;
     },
     addCareerLibraryData(state, action) {
       state.careerLibraryData = action.payload.careerLibraryData;

@@ -1,13 +1,15 @@
-import { Button, Zoom, Paper, Popper, Typography } from "@mui/material";
-import { useState } from "react";
+import { Button, Grid } from "@mui/material";
+// import { Zoom, Paper, Popper, Typography } from "@mui/material";
+// import { useState } from "react";
+// import Pathway from "./PathwayDepiction";
+// import CareerStepper from "./CareerStepper";
 import Dashboard from "../layout/Dashboard";
-import Pathway from "./PathwayDepiction";
 import classes from "./Pathway.module.css";
-import CareerStepper from "./CareerStepper";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// let tmp;
+import JobCard from "./JobCard";
 
+// let tmp;
 const CareerPathway = (props) => {
   // let strokeDashoffset = 458;
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ const CareerPathway = (props) => {
   // const [openPopper, setOpenPopper] = useState(1);
   // const [anchorEl, setAnchorEl] = useState("");
   // if (!pathway.prediction.length || !pathway.path.length) {
-  if (!pathway.prediction.length) {
+  if (!pathway?.prediction?.length) {
     return (
       <Dashboard>
         <div className={classes.formContainer}>
@@ -51,6 +53,8 @@ const CareerPathway = (props) => {
   //   default:
   //     break;
   // }
+
+  console.log(pathway);
   return (
     <Dashboard>
       <div className={classes.formContainer}>
@@ -59,6 +63,18 @@ const CareerPathway = (props) => {
           <div className={classes.careerName}>{pathway.prediction}</div>
 
           <div className={classes.pathwayContainer}>
+            <Grid container justifyContent="center" spacing={{ md: 1, xs: 0 }}>
+              {pathway?.jobsAvailable?.map((job, index) => (
+                <JobCard
+                  key={index}
+                  careerName={job.job_title}
+                  companyName={job.companyname}
+                  location={job.companylocation}
+                  jobDescription={job.description}
+                  link={job.link}
+                />
+              ))}
+            </Grid>
             {/* {pathway.path.map((stepText, index) => (
               <Popper
                 style={{ zIndex: 100 }}

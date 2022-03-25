@@ -11,7 +11,6 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import classes from "./Navbar.module.css";
 import {
-  Button,
   Divider,
   Drawer,
   List,
@@ -171,7 +170,7 @@ export default React.memo(function Navbar(props) {
                 >
                   {user.userAuthInfo.name ? (
                     <div style={{ cursor: "text" }} className={classes.logo}>
-                      {`Hello, ${user.userAuthInfo.name}`}
+                      {`Hello,   ${user.userAuthInfo.name}`}
                     </div>
                   ) : null}
                 </Box>

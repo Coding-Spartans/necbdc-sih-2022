@@ -8,8 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../store/user-slice";
 import { useNavigate } from "react-router-dom";
 import NumberQuestion from "./NumberQuestion";
-import AutocompleteField from "./AutoCompleteField";
-import { predictionQuestions } from "./predictionQuestions";
+import { predictionQuestions_1 } from "./predictionQuestions";
 import SliderQuestion from "./SliderQuestion";
 const UGPredictionForm = () => {
   const [answers, setAnswers] = useState({});
@@ -30,11 +29,12 @@ const UGPredictionForm = () => {
     });
   };
   const submitHandler = (event) => {
+    event.preventDefault();
     setError(false);
     setResponseError(false);
     setLoading(true);
     const questions = [];
-    predictionQuestions.forEach((question) => {
+    predictionQuestions_1.forEach((question) => {
       questions.push(question.headerLabel);
     });
     const questionsAnswered = Object.keys(answers);
@@ -54,23 +54,24 @@ const UGPredictionForm = () => {
         return answers[question];
       }
     });
-    console.log([
-      ...answersArray.slice(0, 33),
-      Math.random() > 0.5 ? "work" : "salary",
-      ...answersArray.slice(33),
-    ]);
+
     if (questionNotAnswered) {
       setError(true);
       setLoading(false);
       setResponseError(false);
       return;
     }
+    console.log([
+      ...answersArray.slice(0, 28),
+      Math.random() < 0.5 ? "work" : "salary",
+      ...answersArray.slice(28),
+    ]);
     axios
-      .post("https://forestclassifier-api.herokuapp.com/cse", {
+      .post("http://127.0.0.1:5000/cses", {
         input: [
-          ...answersArray.slice(0, 33),
-          Math.random() > 0.5 ? "work" : "salary",
-          ...answersArray.slice(33),
+          ...answersArray.slice(0, 28),
+          Math.random() < 0.5 ? "work" : "salary",
+          ...answersArray.slice(28),
         ],
       })
       .then((response) => {
@@ -79,14 +80,19 @@ const UGPredictionForm = () => {
           userActions.addPathway({
             prediction: mlOutput.prediction,
             mean: 0,
-            path: [],
+            jobsAvailable: mlOutput.data_acquired,
           })
         );
+        console.log(mlOutput);
         navigate("/predict-career/pathway");
         axios
           .post(
             "https://sih-api.herokuapp.com/api/output",
-            { ...mlOutput },
+            {
+              prediction: mlOutput.prediction,
+              mean: 0,
+              whole1: mlOutput.data_acquired,
+            },
             {
               headers: {
                 Authorization: "Bearer " + user.userAuthInfo.token,
@@ -107,7 +113,7 @@ const UGPredictionForm = () => {
       <div className={classes.form}>
         <h5>Fill the details</h5>
         <div className={classes.radioQuestions}>
-          {predictionQuestions.map((question, index) => {
+          {predictionQuestions_1.map((question, index) => {
             switch (question.type) {
               case "radio":
                 return (
@@ -145,6 +151,32 @@ const UGPredictionForm = () => {
                     chosenOption={answers[question.headerLabel]}
                   />
                 );
+              case "text":
+                return (
+                  <NumberQuestion
+                    key={index}
+                    {...{
+                      ...question,
+                      index,
+                      onSelectAnswer: answerSelectHandler,
+                      error,
+                      selectedAnswer: answers[question.headerLabel],
+                    }}
+                  />
+                );
+              case "textarea":
+                return (
+                  <NumberQuestion
+                    key={index}
+                    {...{
+                      ...question,
+                      index,
+                      onSelectAnswer: answerSelectHandler,
+                      error,
+                      selectedAnswer: answers[question.headerLabel],
+                    }}
+                  />
+                );
               case "select":
                 return (
                   <AutoCompleteFieldUG
@@ -167,7 +199,10 @@ const UGPredictionForm = () => {
           <Button
             className={classes.formButton + " " + classes.signIn}
             variant="contained"
-            onClick={submitHandler}
+            // onClick={submitHandler}
+            onClick={() => {
+              navigate("/predict-career/pathway");
+            }}
           >
             {loading ? (
               <CircularProgress

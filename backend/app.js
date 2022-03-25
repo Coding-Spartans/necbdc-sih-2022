@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose')
 require('dotenv').config()
+console.log(process.env.DPASS)
 const URI = `mongodb+srv://${process.env.NAME}:${process.env.DPASS}@cluster0.1tdiu.mongodb.net/${process.env.dbname}`
 const apiPage = require('./module/feed');
 const authPage = require('./module/auth');
